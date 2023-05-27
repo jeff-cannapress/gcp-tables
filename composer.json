@@ -1,0 +1,22 @@
+{
+    "name": "cannapress/gcp-tables",
+    "description": "a tabular data store for google cloud platform",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "CannaPress\\GcpTables\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Jeff Becker",
+            "email": "jeff@cannapress.tech"
+        }
+    ],
+    "require": {
+        "google/cloud-functions-framework": "^1.2",
+        "psr/http-message": "^1.1",
+        "google/cloud-storage": "^1.31"
+    }
+}
