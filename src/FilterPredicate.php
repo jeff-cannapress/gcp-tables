@@ -14,7 +14,7 @@ abstract class FilterPredicate
     public abstract function isIdOnly(): bool;
     public abstract function __invoke(EntryRef $entry): bool;
     public abstract function allProps(): array;
-    public static function parse(array $filter_params): FilterPredicate
+    public static function parse(array $filter): FilterPredicate
     {
         throw new \Exception("Not Implemented");
     }

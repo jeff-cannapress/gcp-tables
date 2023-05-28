@@ -9,4 +9,6 @@ interface EntryRef
 {
     function get(string $attrName): string|null;
     function allAttrs(): array;
+    function id(): string;
+    function etag(): string;
 }
