@@ -6,7 +6,6 @@ namespace CannaPress\GcpTables;
 
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\UriInterface;
 use \GuzzleHttp\Psr7\Response;
 
 class Endpoint

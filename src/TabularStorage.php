@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace CannaPress\GcpTables;
 
-use CannaPress\GcpTables\FilterPredicate;
-
-use Exception;
+use CannaPress\GcpTables\Filesystem\StorageItem;
+use CannaPress\GcpTables\Filesystem\Storage;
+use CannaPress\GcpTables\Filters\FilterPredicate;
+use CannaPress\GcpTables\Filters\SortTerm;
 use InvalidArgumentException;
 
 abstract class TabularStorage
@@ -77,13 +78,40 @@ abstract class TabularStorage
                 }
                 $this->storage->delete("/domains/$domain/$id");
             }
-            public function entry_query(string $domain, FilterPredicate $filter, SortTerm $sort, int $skip, int $take, bool $countOnly): TabularStorageQueryResult
+            public function entry_query(string $domain, FilterPredicate $filter, ?SortTerm $sort, int $skip, int $take, bool $countOnly): TabularStorageQueryResult
             {
                 if (!$this->domain_exists($domain)) {
                     throw new InvalidArgumentException("Domain does not exist $domain");
                 }
-                throw new \Exception("not Implemented");
+                $entryRefs = [];
+                $pagingToken = '';
+                do {
+                    $res = $this->storage->list("/domains/$domain/");
+                    foreach ($res->items as $item) {
+                        $id = substr($item->path, strlen("/domains/$domain/"));
+                        $entry = self::entry($id, $item);
+                        if ($filter->__invoke($entry)) {
+                            $entryRefs[] = $entry;
+                        }
+                    }
+                    $pagingToken = $res->pagingToken;
+                } while (!empty($pagingToken));
+                if ($countOnly) {
+                    return new TabularStorageQueryResult(count($entryRefs), []);
+                }
+                if (!is_null($sort)) {
+                    uasort($entryRefs, fn ($a, $b) => $sort->compare($a, $b));
+                }
+                if ($take === -1) {
+                    $take = count($entryRefs) - $skip;
+                }
+                $entryRefs = array_slice($entryRefs, $skip, $take);
+                return new TabularStorageQueryResult(
+                    count(array_keys($entryRefs)),
+                    $entryRefs
+                );
             }
+
             private static function entry(string $id, StorageItem $storageItem): EntryRef
             {
                 return new class($id, $storageItem) implements EntryRef

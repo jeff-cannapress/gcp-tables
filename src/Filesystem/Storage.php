@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CannaPress\GcpTables;
+namespace CannaPress\GcpTables\Filesystem;
 
 use DateTimeImmutable;
 use DateTimeZone;
