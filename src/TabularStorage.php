@@ -6,20 +6,22 @@ namespace CannaPress\GcpTables;
 
 use CannaPress\GcpTables\Filesystem\StorageItem;
 use CannaPress\GcpTables\Filesystem\Storage;
-use CannaPress\GcpTables\Filters\FilterPredicate;
+use CannaPress\GcpTables\Filters\TableFilter;
 use CannaPress\GcpTables\Filters\SortTerm;
 use InvalidArgumentException;
 
 abstract class TabularStorage
 {
+    public abstract function cleanup_deleted_domain(string $domain, string $workId): void;
     public abstract function domain_create(string $domain): void;
-    public abstract function domain_exists(string $domain): bool;
-    public abstract function domain_delete(string $domain): void;
+    public abstract function domain_exists(string $domain): string|false;
+    public abstract function domain_delete(string $domain): string;
+    public abstract function domain_list(): array;
 
     public abstract function entry_put(string $domain, string $id, array $data, ?string $etag): EntryRef;
     public abstract function entry_delete(string $domain, string $id, ?string $etag): void;
     public abstract function entry_get(string $domain, string $id): EntryRef | false;
-    public abstract function entry_query(string $domain, FilterPredicate $filter, ?SortTerm $sort, int $skip, int $take, bool $countOnly): TabularStorageQueryResult;
+    public abstract function entry_query(string $domain, ?TableFilter $filter, ?SortTerm $sort, int $skip, int $take, bool $countOnly): TabularStorageQueryResult;
 
 
     public static function over_storage(Storage $storage)
@@ -31,16 +33,32 @@ abstract class TabularStorage
             }
             public function domain_create(string $domain): void
             {
-                $this->storage->write("/domains/$domain.exists", "1", null);
+                $this->storage->write("/domains/$domain.exists", strval(microtime(true)), null);
             }
-            public function domain_exists(string $domain): bool
+            public function domain_exists(string $domain): string|false
             {
-                return $this->storage->exists("/domains/$domain.exists");
+                $key = $this->storage->read("/domains/$domain.exists");
+                if ($key !== null) {
+                    return $key->etag;
+                }
+                return false;
             }
-            public function domain_delete(string $domain): void
+            public function domain_delete(string $domain): string
             {
-                if ($this->storage->exists("/domains/$domain.exists")) {
+                if ($this->storage->read("/domains/$domain.exists")) {
                     $this->storage->delete("/domains/$domain.exists");
+                    $workId = strval(microtime(true));
+                    $this->storage->write("/domains/$domain.deleted", $workId, null);
+                    return $workId;
+                }
+                return '';
+            }
+            public function cleanup_deleted_domain(string $domain, string $workId): void
+            {
+
+                $deletedRef = $this->storage->read("/domains/$domain.deleted");
+                if ($deletedRef && $deletedRef->getData() === $workId) {
+                    $this->storage->delete("/domains/$domain.deleted");
                     $countResults = 0;
                     do {
                         $res = $this->storage->list(prefix: "/domains/$domain/");
@@ -51,6 +69,24 @@ abstract class TabularStorage
                     } while ($countResults > 0);
                 }
             }
+            public function domain_list(): array
+            {
+                $pagingToken = '';
+                $result = [];
+                do {
+                    $res = $this->storage->list(prefix: "/domains/", delimiter: '/');
+
+                    foreach ($res->items as $path) {
+                        if (!str_ends_with($path, '.deleted')) {
+                            $name = substr($path, 9/*strlen('/domains/')*/, strlen($path) - 16/*strlen('/domains/')+strlen('.exists') */);
+                            $result[$name] = $this->storage->read($path)->etag;
+                        }
+                    }
+                    $pagingToken = $res->pagingToken;
+                } while (!empty($pagingToken));
+                return $result;
+            }
+
             public function entry_put(string $domain, string $id, array $data, ?string $etag): EntryRef
             {
                 if (!$this->domain_exists($domain)) {
@@ -58,7 +94,8 @@ abstract class TabularStorage
                 }
                 $path = "/domains/$domain/$id";
                 $updated = $this->storage->write($path, http_build_query($data), $etag);
-                return self::entry($id, $updated);
+                $this->storage->write("/domains/$domain.exists", strval(microtime(true)), null);
+                return new EntryRef($id, $updated);
             }
             public function entry_get(string $domain, string $id): EntryRef | false
             {
@@ -69,7 +106,7 @@ abstract class TabularStorage
                 if (!$this->storage->exists($path)) {
                     return false;
                 }
-                return self::entry($id, $this->storage->read($path));
+                return new EntryRef($id, $this->storage->read($path));
             }
             public function entry_delete(string $domain, string $id, ?string $etag): void
             {
@@ -77,8 +114,9 @@ abstract class TabularStorage
                     throw new InvalidArgumentException("Domain does not exist $domain");
                 }
                 $this->storage->delete("/domains/$domain/$id");
+                $this->storage->write("/domains/$domain.exists", strval(microtime(true)), null);
             }
-            public function entry_query(string $domain, FilterPredicate $filter, ?SortTerm $sort, int $skip, int $take, bool $countOnly): TabularStorageQueryResult
+            public function entry_query(string $domain, ?TableFilter $filter, ?SortTerm $sort, int $skip, int $take, bool $countOnly): TabularStorageQueryResult
             {
                 if (!$this->domain_exists($domain)) {
                     throw new InvalidArgumentException("Domain does not exist $domain");
@@ -89,8 +127,8 @@ abstract class TabularStorage
                     $res = $this->storage->list("/domains/$domain/");
                     foreach ($res->items as $item) {
                         $id = substr($item->path, strlen("/domains/$domain/"));
-                        $entry = self::entry($id, $item);
-                        if ($filter->__invoke($entry)) {
+                        $entry = new EntryRef($id, $item);
+                        if (is_null($filter) || $filter->__invoke($entry)) {
                             $entryRefs[] = $entry;
                         }
                     }
@@ -110,44 +148,6 @@ abstract class TabularStorage
                     count(array_keys($entryRefs)),
                     $entryRefs
                 );
-            }
-
-            private static function entry(string $id, StorageItem $storageItem): EntryRef
-            {
-                return new class($id, $storageItem) implements EntryRef
-                {
-                    private ?array $_allAttrs = null;
-                    public function __construct(private string $id, private StorageItem $storageItem)
-                    {
-                    }
-                    function get(string $attrName): string|null
-                    {
-                        if ($attrName === 'id') {
-                            return $this->id;
-                        }
-                        $attrs = $this->allAttrs();
-                        if (isset($attrs[$attrName])) {
-                            return $attrs[$attrName];
-                        }
-                        return null;
-                    }
-                    function allAttrs(): array
-                    {
-                        if ($this->_allAttrs === null) {
-                            $data = $this->storageItem->getData();
-                            parse_str($data, $this->_allAttrs);
-                        }
-                        return $this->_allAttrs;
-                    }
-                    function id(): string
-                    {
-                        return $this->id;
-                    }
-                    function etag(): string
-                    {
-                        return $this->storageItem->etag;
-                    }
-                };
             }
         };
     }

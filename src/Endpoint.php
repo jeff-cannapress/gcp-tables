@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace CannaPress\GcpTables;
 
+use CannaPress\GcpTables\Filters\SortTerm;
+use CannaPress\GcpTables\Filters\TableFilter;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use \GuzzleHttp\Psr7\Response;
@@ -34,7 +36,15 @@ class Endpoint
         $path = explode('/', $path, 2);
         $path[1] = isset($path[1]) ? $path[1] : null;
         list($domain, $id) = $path;
+        if(empty($domain)){
+            throw new EndpointException(404, 'Invalid Endpoint -- no domain found', ['uri'=> $request->getUri()->__toString()]);
+        }
         $query = $request->getUri()->getQuery();
+        $is_entry = !is_null($id) || !empty($query);
+        if($is_entry){
+
+        }
+
         if (!empty($query)) {
             parse_str($query, $query);
         } else {
@@ -43,9 +53,11 @@ class Endpoint
         $etag = $request->getHeader('if-match');
         $etag = empty($etag) ? null : $etag[0];
         $method = strtoupper($request->getMethod());
-        return $this->executeRequest($method, $domain, $id, $query, $etag);
+        $contentType = strtolower($request->getHeader('Content-Type')[0]);
+        $bodyContents = $request->getBody()->getContents();
+        return $this->executeRequest($method, $domain, $id, $query, $etag, $contentType, $bodyContents);
     }
-    public function executeRequest(string $method, string $domain, ?string $id, ?array $query, ?string $etag): ResponseInterface
+    public function executeRequest(string $method, string $domain, ?string $id, ?array $query, ?string $etag, string $contentType, string $bodyContents): ResponseInterface
     {
         $is_entry = !is_null($id) || !empty($query);
         if ($is_entry) {
@@ -64,7 +76,7 @@ class Endpoint
                         if (!isset($query['filter']) || empty($query['filter'])) {
                             return new Response(422, [], "Either a filter query parameter or id path parameter is required");
                         }
-                        $filter = FilterPredicate::parse($query['filter']);
+                        $filter = TableFilter::parse($query['filter']);
                         $sort = isset($query['sort']) ? SortTerm::parse($query['sort']) : null;
                         $skip = isset($query['skip']) ? intval($query['skip']) : 0;
                         $take = isset($query['take']) ? intval($query['take']) : -1;
@@ -81,15 +93,21 @@ class Endpoint
                             ],
                         ], http_build_query($responseBody));
                     } catch (\Throwable $ex) {
+                        if($ex instanceof \CannaPress\GcpTables\Filesystem\StorageException){
+
+                        }
+                        else if($ex instanceof \CannaPress\GcpTables\Filters\TableFilterException){
+
+                        }
                     }
                 }
-                //$this->tables->entry_get()
+
             } else if ($method  === 'PUT') {
-                $contentType = strtolower($request->getHeader('Content-Type')[0]);
+
                 if ($contentType !== self::FORM_ENCODED) {
                     return new Response(415, [], "Invalid Content-Type \"$contentType\" PUT requires application/x-www-form-urlencoded");
                 }
-                $bodyContents = $request->getBody()->getContents();
+
                 parse_str($bodyContents, $data);
                 $result = $this->tables->entry_put($domain, $id, $data, $etag);
                 return new Response(200, [

@@ -7,7 +7,7 @@ namespace CannaPress\GcpTables\Filters;
 use Exception;
 
 
-class FilterException extends Exception
+class TableFilterException extends Exception
 {
 
     public function __construct(public string $message, public array $errorDetail)

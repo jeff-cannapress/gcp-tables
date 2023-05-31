@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace CannaPress\GcpTables;
 
+use JsonSerializable;
 
-class TabularStorageQueryResult
+class TabularStorageQueryResult implements JsonSerializable
 {
     /**
      * 
@@ -14,4 +15,12 @@ class TabularStorageQueryResult
      * @return void 
      */
     public function __construct(public int $totalItems, public array $items){}
+
+    public function jsonSerialize(): mixed { 
+        return [
+            'totalItems'=>$this->totalItems,
+            'items'=> array_map(fn($x)=>$x->jsonSerialize(), $this->items),
+            'etags'=> array_map(fn($x)=>$x->etag(), $this->items)
+        ];
+    }
 }

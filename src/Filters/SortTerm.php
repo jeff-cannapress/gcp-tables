@@ -7,18 +7,24 @@ namespace CannaPress\GcpTables\Filters;
 
 class SortTerm
 {
-    private FilterPredicate $term;
-    public function __construct(Filter $filter, public string $direction)
+    public static function parse(string $sortSpec)
     {
-        if ($filter->type !== Filter::type_attribute) {
-            throw new FilterException("Unable to compile sort term -- an attribute is required", ['filter' => $filter->serialize()]);
+        $inner = explode(' ', trim($sortSpec));
+        $inner = array_filter($inner, fn ($y) => !empty(trim($y)));
+        $direction = 'asc';
+        if (isset($inner[1])) {
+            $direction = strtolower($inner[1]);
         }
-        $this->term = Filter::compile($filter);
+        return new self(TableFilter::attribute($inner[0], 0, 0), $direction);
     }
-    public function compare(FilterValueAccessor $a, FilterValueAccessor $b)
+
+    public function __construct(private TableFilter $filter, public string $direction)
     {
-        $aValue = $this->term->__invoke($a);
-        $bValue = $this->term->__invoke($b);
+    }
+    public function compare(TableFilterValueAccessor $a, TableFilterValueAccessor $b)
+    {
+        $aValue = $this->filter->__invoke($a);
+        $bValue = $this->filter->__invoke($b);
         return strcmp($aValue, $bValue) * ($this->direction === 'asc' ? 1 : -1);
     }
 }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CannaPress\GcpTables;
+namespace CannaPress\GcpTables\Endpoints;
 
 use Exception;
 use GuzzleHttp\Psr7\Response;

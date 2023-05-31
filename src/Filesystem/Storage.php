@@ -11,11 +11,10 @@ use InvalidArgumentException;
 abstract class Storage
 {
 
-    public abstract function write(string $path, string $data, ?string $etag): StorageItem;
-    public abstract function exists(string $path): bool;
-    public abstract function read(string $path): StorageItem;
+    public abstract function write(string $path, string $data, ?string $etag = null): StorageItem;
+    public abstract function read(string $path): ?StorageItem;
     public abstract function list(string $prefix = '', string $delimiter = '', int $pageSize = 1000, string $pagingToken = ''): StorageListResult;
-    public abstract function delete(string $path): void;
+    public abstract function delete(string $path, ?string $etag = null): void;
 
 
     public static function in_memory(): Storage
@@ -24,20 +23,27 @@ abstract class Storage
         {
             private array $objects = [];
 
-            public function delete(string $path): void
+            public function delete(string $path, ?string $etag = null): void
             {
+                if (!is_null($etag)) {
+                    if (!isset($this->objects[$path])) {
+                        throw new StorageException("An etag was supplied but no object at that path was found", ['path' => $path, 'etag' => $etag]);
+                    } else if ($this->objects[$path]['etag'] !== $etag) {
+                        throw new StorageException("An etag was supplied but no object at that path was found", ['path' => $path, 'etag' => $etag]);
+                    }
+                }
                 if (isset($this->objects[$path])) {
                     unset($this->objects[$path]);
                 }
             }
 
-            public function write(string $path, string $data, ?string $etag): StorageItem
+            public function write(string $path, string $data, ?string $etag = null): StorageItem
             {
                 if (!is_null($etag)) {
                     if (!isset($this->objects[$path])) {
-                        throw new InvalidArgumentException("An etag was supplied but no object at that path was found");
+                        throw new StorageException("An etag was supplied but no object at that path was found", ['path' => $path, 'etag' => $etag]);
                     } else if ($this->objects[$path]['etag'] !== $etag) {
-                        throw new InvalidArgumentException("An etag was supplied but no object at that path was found");
+                        throw new StorageException("An etag was supplied but no object at that path was found", ['path' => $path, 'etag' => $etag]);
                     }
                 }
                 $this->objects[$path] = [
@@ -46,13 +52,10 @@ abstract class Storage
                 ];
                 return new StorageItem($path, $this->objects[$path]['etag'], fn () => $this->objects[$path]['data']);
             }
-            public function exists(string $path): bool
+
+            public function read(string $path): ?StorageItem
             {
-                return isset($this->objects[$path]);
-            }
-            public function read(string $path): StorageItem
-            {
-                if (!$this->exists($path)) {
+                if (!isset($this->objects[$path])) {
                     throw new \RuntimeException("$path doesnt exist");
                 }
                 return new StorageItem($path, $this->objects[$path]['etag'], fn () => $this->objects[$path]['data']);

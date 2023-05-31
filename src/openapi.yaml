@@ -1,0 +1,278 @@
+openapi: 3.0.3
+info:
+  title: Google Cloud Platform Tabular Storage API - OpenAPI 3.0
+  contact:
+    email: jeff@cannapress.tech
+  version: 1.0.11
+
+paths:
+  /domains:
+    get:
+      summary: get a list of domains
+      operationId: domainList
+      responses:
+        '200':
+          description: an dictionary of domain names to their etags
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/DomainListResult'           
+  /domains/{domainId}:
+    head:
+      summary: check if a domain exists
+      operationId: domainExists
+      parameters:
+        - name: domainId
+          in: path
+          description: the id of the domain
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdParameter'
+      responses:
+        '204':
+          description: Domain Exists
+          headers:
+            ETag:
+              schema:
+                type: string
+        '404':
+          description: Domain not found
+        '422':
+          description: Invalid/malformed domainId
+          
+    put:
+      summary: create a domain
+      operationId: domainCreate
+      parameters:
+        - name: domainId
+          in: path
+          description: the id of the domain
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdParameter'     
+      responses:
+        '204': 
+          description: Domain already existed & no action was taken
+          headers:
+            ETag:
+              schema:
+                type: string          
+        '201': 
+          description: Domain was created as a result of this action
+          headers:
+            ETag:
+              schema:
+                type: string          
+        '422':
+          description: Invalid/malformed domainId
+    delete:
+      summary: delete the domain
+      operationId: domainDelete
+      parameters:
+        - name: domainId
+          in: path
+          description: the id of the domain
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdParameter'
+        - in: header
+          name: If-Match
+          schema:
+            type: string
+          required: false              
+      responses:
+        '204':
+          description: Domain was deleted
+        '404':
+          description: Domain not found
+        '422':
+          description: Invalid/malformed domainId
+        '412':
+          description: The client included an if-match header but the etags did not matc          
+    get:
+      summary: query entries in the domain
+      operationId: entryQuery
+      parameters:
+        - name: domainId
+          in: path
+          description: the id of the domain
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdParameter'    
+        - name: filter
+          in: query
+          description: the filter for the query
+          required: false
+          schema:
+            type: string
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: skip
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: take
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: countOnly
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: query results
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/EntryQueryResult' 
+            
+          
+  /domains/{domainId}/{entryId}:
+    get:
+      summary: read an entry
+      operationId: entryGet
+      parameters:
+        - name: domainId
+          in: path
+          description: the id of the domain
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdParameter'
+        - name: entryId
+          in: path
+          description: the id of the domain
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdParameter'            
+      responses:
+        '200': 
+          description: The url-encoded content of the entry
+          headers:
+            ETag:
+              schema:
+                type: string          
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/EntryBody'         
+        '404':
+          description: entry not found          
+        '422':
+          description: Invalid/malformed domainId or entryId  
+    put:
+      summary: create or update an entry
+      operationId: entryUpdate
+      parameters:
+        - name: domainId
+          in: path
+          description: the id of the domain
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdParameter'
+        - name: entryId
+          in: path
+          description: the id of the domain
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdParameter'
+        - in: header
+          name: If-Match
+          schema:
+            type: string
+          required: false            
+      requestBody:
+        description: the attributes of the entry
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EntryBody'
+      responses:
+        '201': 
+          description: The url-encoded content of the entry
+          headers:
+            ETag:
+              schema:
+                type: string          
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/EntryBody' 
+        '412':
+          description: The client included an if-match header but the etags did not match
+        '422':
+          description: Invalid/malformed domainId or entryId
+    delete:
+      summary: delete an entry
+      operationId: entryDelete
+      parameters:
+        - name: domainId
+          in: path
+          description: the id of the domain
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdParameter'
+        - name: entryId
+          in: path
+          description: the id of the domain
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdParameter'
+        - in: header
+          name: If-Match
+          schema:
+            type: string
+          required: false             
+      responses:
+        '200': 
+          description: The entry was deleted
+        '412':
+          description: The client included an if-match header but the etags did not match
+        '404':
+          description: entry not found
+        '422':
+          description: Invalid/malformed domainId or entryId          
+
+
+components:
+  schemas:
+    IdParameter:
+      type: string
+      minLength: 3
+      maxLength: 128
+      pattern: '^[a-zA-Z_][a-zA-Z_0-9-.]{2,127}$'      
+    EntryBody:
+      type: object
+      properties:
+        id:
+          type: string
+        additionalProperties:
+          type: string
+          
+    EntryQueryResult:
+      type: object
+      properties:
+        totalItems:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items: 
+            $ref: '#/components/schemas/EntryBody'
+        etags:
+          type: array
+          items:
+            type: string
+    DomainListResult:
+      type: object
+      properties:
+        additionalProperties:
+          type: string           
+ 
