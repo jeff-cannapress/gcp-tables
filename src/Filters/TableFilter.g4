@@ -12,8 +12,6 @@ expr
  | expr K_NOT? K_IN ( OPEN_PAR ( expr ( ',' expr )* )? CLOSE_PAR ) #inExpr
  ;
 
-
-
 OPEN_PAR : '(';
 CLOSE_PAR : ')';
 K_AND : A N D;
@@ -28,11 +26,8 @@ K_OR : O R;
 
 OPERATOR: '<' | '<=' | '>' | '>=' | '==' | '<>' | 'and' | 'or';
 
-
-
-
 IDENTIFIER
- : [a-zA-Z_] [a-zA-Z_0-9-.]* // TODO check: needs more chars in set
+ : [a-zA-Z_] [a-zA-Z_0-9-.]* 
  ;
 
 

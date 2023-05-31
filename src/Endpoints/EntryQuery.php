@@ -11,6 +11,10 @@ use Psr\Http\Message\ResponseInterface;
 
 class EntryQuery implements Endpoint
 {   
+    public function __construct(private TabularStorage $tabularStorage)
+    {
+        
+    }
     public function invoke(RequestInterface $request, EndpointParameters $params): ResponseInterface{
         throw new \Exception("Not Implemented");
     }
