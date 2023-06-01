@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace CannaPress\GcpTables;
 
-use CannaPress\GcpTables\Filesystem\StorageItem;
 use CannaPress\GcpTables\Filesystem\Storage;
 use CannaPress\GcpTables\Filters\TableFilter;
 use CannaPress\GcpTables\Filters\SortTerm;
@@ -75,7 +74,6 @@ abstract class TabularStorage
                 $result = [];
                 do {
                     $res = $this->storage->list(prefix: "/domains/", delimiter: '/');
-
                     foreach ($res->items as $path) {
                         if (!str_ends_with($path, '.deleted')) {
                             $name = substr($path, 9/*strlen('/domains/')*/, strlen($path) - 16/*strlen('/domains/')+strlen('.exists') */);

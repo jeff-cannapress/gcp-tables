@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Generated from TableFilter.g4 by ANTLR 4.13.0
+ * Generated from TableFilter.g4 by ANTLR 4.12.0
  */
 
 namespace CannaPress\GcpTables\Filters;
@@ -82,6 +82,16 @@ interface TableFilterVisitor extends ParseTreeVisitor
 	 * @return mixed The visitor result.
 	 */
 	public function visitLikeExpr(Context\LikeExprContext $context);
+
+	/**
+	 * Visit a parse tree produced by the `logicExpression` labeled alternative
+	 * in {@see TableFilterParser::expr()}.
+	 *
+	 * @param Context\LogicExpressionContext $context The parse tree.
+	 *
+	 * @return mixed The visitor result.
+	 */
+	public function visitLogicExpression(Context\LogicExpressionContext $context);
 
 	/**
 	 * Visit a parse tree produced by the `attributeExpr` labeled alternative

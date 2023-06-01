@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CannaPress\GcpTables\Filters;
 
 use Antlr\Antlr4\Runtime\Tree\AbstractParseTreeVisitor;
+use Antlr\Antlr4\Runtime\Tree\ParseTreeVisitor;
 use CannaPress\GcpTables\Filters\Context\AttributeExprContext;
 use CannaPress\GcpTables\Filters\Context\BinaryExpressionContext;
 use CannaPress\GcpTables\Filters\Context\InExprContext;
@@ -15,6 +16,7 @@ use CannaPress\GcpTables\Filters\Context\NotExprContext;
 use CannaPress\GcpTables\Filters\Context\StrLiteralContext;
 use CannaPress\GcpTables\Filters\TableFilterVisitor;
 use Antlr\Antlr4\Runtime\InputStream;
+use CannaPress\GcpTables\Filters\Context\LogicExpressionContext;
 use CannaPress\GcpTables\Filters\TableFilterLexer;
 use CannaPress\GcpTables\Filters\TableFilterParser;
 
@@ -133,7 +135,7 @@ abstract class TableFilter
 
     public static function like(TableFilter $lhs, TableFilter $rhs, bool $notLike, int $line, int $column)
     {
-        return new class($lhs, $rhs, $line, $column) extends TableFilter
+        return new class($lhs, $rhs, $notLike, $line, $column) extends TableFilter
         {
             public function __construct(private TableFilter $lhs, private TableFilter $rhs, private bool $notLike, int $line, int $column)
             {
@@ -147,7 +149,8 @@ abstract class TableFilter
             {
                 $rhs = TableFilter::convert_like_to_regex($this->rhs->__invoke($entryRef), $this->line, $this->column);
                 $lhs = $this->lhs->__invoke($entryRef);
-                $res = preg_match($rhs, $lhs) !== false;
+                $match = preg_match($rhs, $lhs);
+                $res =  $match  === 1;
                 return $this->notLike ? !$res : $res;
             }
         };
@@ -155,7 +158,6 @@ abstract class TableFilter
 
     public static function binary(string $operator, TableFilter $lhs, TableFilter $rhs, int $line, int $column): TableFilter
     {
-        //expr ( '<' | '<=' | '>' | '>=' | '==' | '<>' | 'and' | 'or' ) expr #compareExpr
         return new class($operator, $lhs, $rhs, $line, $column) extends TableFilter
         {
             public function __construct(private string $operator, private TableFilter $lhs, private TableFilter $rhs, int $line, int $column)
@@ -186,7 +188,7 @@ abstract class TableFilter
                     case 'and':
                         return $lhsValue && $rhsValue;
                     case 'or':
-                        return $lhsValue && $rhsValue;
+                        return $lhsValue || $rhsValue;
                     default:
                         throw new TableFilterException("Invalid Filter Operator $this->operator", [
                             'line' => $this->line,
@@ -206,38 +208,42 @@ abstract class TableFilter
             $len = strlen($clause);
             $result = '';
             while ($p < $len) {
-                if (preg_match('/^(%%?)/',  substr($clause, $p), $matches) !== false) {
-                    if (strlen($matches[0]) === 1) {
+                $subclause = substr($clause, $p);
+                $matches = [];
+                if(strpos($subclause, '%',0) === 0){
+                    //escaped with %%
+                    if (strlen($subclause) > 1 && strpos($subclause, '%',1) === 1){
+                        $result .= '%%';
+                        $p+=2;
+                    }
+                    else{
                         $result .= '.*';
-                    } else {
-                        $result += $matches[0];
+                        $p+=1;
                     }
-                    $p += strlen($matches[0]);
                 }
-                //matches _ accounting for double-_ escaping
-                else if (preg_match('/^(__?)/', substr($clause, $p), $matches) !== false) {
-                    if (strlen($matches[0]) === 1) {
+                else if(strpos($clause, '_',0)=== 0){
+                        //escaped with %%
+                        if (strlen($subclause) > 1 && strpos($subclause, '_',1) === 1){
+                        $result .= '__';
+                        $p+=2;
+                    }
+                    else{
                         $result .= '.';
-                    } else {
-                        $result += $matches[0];
+                        $p+=1;
                     }
-                    $p += strlen($matches[0]);
                 }
-                //matches anything else
-                else if (preg_match('/^([^%_]+)/', substr($clause, $p), $matches) !== false) {
-                    $result .= preg_quote($matches[0]);
-                    $p += strlen($matches[0]);
-                } else {
-                    throw new TableFilterException("Invalid like expression \"$clause\", unexpected sequence at $p", ['clause' => $clause, 'position' => $p, 'line' => $line, 'column' => $column]);
-                }
+                else{
+                    $result .= substr($clause,0,1);
+                    $p+=1;
+                }       
             }
-            TableFilter::$compiled_like_cache[$clause] = '/' . $result . '/';
+            TableFilter::$compiled_like_cache[$clause] = '/^' . $result . '$/';
         }
         return TableFilter::$compiled_like_cache[$clause];
     }
 
     private static function visitor(){
-        return new class implements TableFilterVisitor
+        return new class  extends AbstractParseTreeVisitor implements TableFilterVisitor
         {
             private function visitChild($child): TableFilter
             {
@@ -282,7 +288,8 @@ abstract class TableFilter
                 $needle = array_shift($haystack);
                 $line =  $context->start->getLine();
                 $column =  $context->start->getCharPositionInLine();
-                $notIn = $context->K_NOT() != null;
+                $notVal = $context->K_NOT();
+                $notIn =  !is_null($notVal);
                 return TableFilter::in($needle, $haystack, $notIn, $line, $column);
             }
         
@@ -318,29 +325,38 @@ abstract class TableFilter
                 $line =  $context->start->getLine();
                 $column =  $context->start->getCharPositionInLine();
                 return TableFilter::binary($operator, $lhs, $rhs,  $line, $column);
+            }   
+	        public function visitLogicExpression(LogicExpressionContext $context): TableFilter{
+                $lhs = $this->visitChild($context->expr(0));
+                $operator = strtolower(trim($context->LOGICAL_OPERATOR()->getText()));
+                $rhs = $this->visitChild($context->expr(1));
+        
+                $line =  $context->start->getLine();
+                $column =  $context->start->getCharPositionInLine();
+                return TableFilter::binary($operator, $lhs, $rhs,  $line, $column);
             }
         };
         
     }
 
-    public static function parse(string $filterText): ?Filter{
+    public static function parse(string $filterText): ?TableFilter{
         $filterText = is_null($filterText)? '' :$filterText;        
         $filterText = trim($filterText);
         if(empty($filterText)){
             return null;
         }
-        $inputStream = new Antlr\Antlr4\Runtime\InputStream::fromString($filterText);
+        $inputStream = \Antlr\Antlr4\Runtime\InputStream::fromString($filterText);
         $lexer = new TableFilterLexer($inputStream);
         $tokens = new \Antlr\Antlr4\Runtime\CommonTokenStream($lexer);
         $parser = new TableFilterParser($tokens);
         $parser->addErrorListener(new class() extends \Antlr\Antlr4\Runtime\Error\Listeners\BaseErrorListener{
             public function syntaxError(
-                Recognizer $recognizer,
+                \Antlr\Antlr4\Runtime\Recognizer $recognizer,
                 ?object $offendingSymbol,
                 int $line,
                 int $charPositionInLine,
                 string $msg,
-                ?RecognitionException $exception,
+                ?\Antlr\Antlr4\Runtime\Error\Exceptions\RecognitionException $exception,
             ): void {
                 throw new TableFilterException($msg, [
                     'line'=>$line,

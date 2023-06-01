@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Generated from TableFilter.g4 by ANTLR 4.13.0
+ * Generated from TableFilter.g4 by ANTLR 4.12.0
  */
 
 namespace CannaPress\GcpTables\Filters {
@@ -23,10 +23,10 @@ namespace CannaPress\GcpTables\Filters {
 
 	final class TableFilterParser extends Parser
 	{
-		public const T__0 = 1, OPEN_PAR = 2, CLOSE_PAR = 3, K_AND = 4, K_IN = 5, 
-               K_IS = 6, K_ISNULL = 7, K_LIKE = 8, K_NOT = 9, K_NOTNULL = 10, 
-               K_NULL = 11, K_OR = 12, OPERATOR = 13, IDENTIFIER = 14, STRING_LITERAL = 15, 
-               SPACES = 16, UNEXPECTED_CHAR = 17;
+		public const T__0 = 1, OPEN_PAR = 2, CLOSE_PAR = 3, K_IN = 4, K_IS = 5, 
+               K_ISNULL = 6, K_LIKE = 7, K_NOT = 8, K_NOTNULL = 9, K_NULL = 10, 
+               OPERATOR = 11, LOGICAL_OPERATOR = 12, IDENTIFIER = 13, STRING_LITERAL = 14, 
+               SPACES = 15, UNEXPECTED_CHAR = 16;
 
 		public const RULE_expr = 0;
 
@@ -48,37 +48,38 @@ namespace CannaPress\GcpTables\Filters {
 		 * @var array<string>
 		 */
 		private const SYMBOLIC_NAMES = [
-		    null, null, "OPEN_PAR", "CLOSE_PAR", "K_AND", "K_IN", "K_IS", "K_ISNULL", 
-		    "K_LIKE", "K_NOT", "K_NOTNULL", "K_NULL", "K_OR", "OPERATOR", "IDENTIFIER", 
+		    null, null, "OPEN_PAR", "CLOSE_PAR", "K_IN", "K_IS", "K_ISNULL", "K_LIKE", 
+		    "K_NOT", "K_NOTNULL", "K_NULL", "OPERATOR", "LOGICAL_OPERATOR", "IDENTIFIER", 
 		    "STRING_LITERAL", "SPACES", "UNEXPECTED_CHAR"
 		];
 
 		private const SERIALIZED_ATN =
-			[4, 1, 17, 51, 2, 0, 7, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 
+			[4, 1, 16, 54, 2, 0, 7, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 
 		    1, 0, 1, 0, 3, 0, 12, 8, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 3, 0, 19, 
-		    8, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 3, 0, 26, 8, 0, 1, 0, 1, 0, 1, 
-		    0, 3, 0, 31, 8, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 5, 0, 38, 8, 0, 10, 
-		    0, 12, 0, 41, 9, 0, 3, 0, 43, 8, 0, 1, 0, 5, 0, 46, 8, 0, 10, 0, 12, 
-		    0, 49, 9, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 61, 0, 11, 1, 0, 0, 0, 2, 
-		    3, 6, 0, -1, 0, 3, 12, 5, 15, 0, 0, 4, 12, 5, 14, 0, 0, 5, 6, 5, 2, 
-		    0, 0, 6, 7, 3, 0, 0, 0, 7, 8, 5, 3, 0, 0, 8, 12, 1, 0, 0, 0, 9, 10, 
-		    5, 9, 0, 0, 10, 12, 3, 0, 0, 5, 11, 2, 1, 0, 0, 0, 11, 4, 1, 0, 0, 
-		    0, 11, 5, 1, 0, 0, 0, 11, 9, 1, 0, 0, 0, 12, 47, 1, 0, 0, 0, 13, 14, 
-		    10, 4, 0, 0, 14, 15, 5, 13, 0, 0, 15, 46, 3, 0, 0, 5, 16, 18, 10, 
-		    3, 0, 0, 17, 19, 5, 9, 0, 0, 18, 17, 1, 0, 0, 0, 18, 19, 1, 0, 0, 
-		    0, 19, 20, 1, 0, 0, 0, 20, 21, 5, 8, 0, 0, 21, 46, 3, 0, 0, 4, 22, 
-		    23, 10, 2, 0, 0, 23, 25, 5, 6, 0, 0, 24, 26, 5, 9, 0, 0, 25, 24, 1, 
-		    0, 0, 0, 25, 26, 1, 0, 0, 0, 26, 27, 1, 0, 0, 0, 27, 46, 5, 11, 0, 
-		    0, 28, 30, 10, 1, 0, 0, 29, 31, 5, 9, 0, 0, 30, 29, 1, 0, 0, 0, 30, 
-		    31, 1, 0, 0, 0, 31, 32, 1, 0, 0, 0, 32, 33, 5, 5, 0, 0, 33, 42, 5, 
-		    2, 0, 0, 34, 39, 3, 0, 0, 0, 35, 36, 5, 1, 0, 0, 36, 38, 3, 0, 0, 
-		    0, 37, 35, 1, 0, 0, 0, 38, 41, 1, 0, 0, 0, 39, 37, 1, 0, 0, 0, 39, 
-		    40, 1, 0, 0, 0, 40, 43, 1, 0, 0, 0, 41, 39, 1, 0, 0, 0, 42, 34, 1, 
-		    0, 0, 0, 42, 43, 1, 0, 0, 0, 43, 44, 1, 0, 0, 0, 44, 46, 5, 3, 0, 
-		    0, 45, 13, 1, 0, 0, 0, 45, 16, 1, 0, 0, 0, 45, 22, 1, 0, 0, 0, 45, 
-		    28, 1, 0, 0, 0, 46, 49, 1, 0, 0, 0, 47, 45, 1, 0, 0, 0, 47, 48, 1, 
-		    0, 0, 0, 48, 1, 1, 0, 0, 0, 49, 47, 1, 0, 0, 0, 8, 11, 18, 25, 30, 
-		    39, 42, 45, 47];
+		    8, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 3, 0, 29, 8, 
+		    0, 1, 0, 1, 0, 1, 0, 3, 0, 34, 8, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 
+		    5, 0, 41, 8, 0, 10, 0, 12, 0, 44, 9, 0, 3, 0, 46, 8, 0, 1, 0, 5, 0, 
+		    49, 8, 0, 10, 0, 12, 0, 52, 9, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 65, 0, 
+		    11, 1, 0, 0, 0, 2, 3, 6, 0, -1, 0, 3, 12, 5, 14, 0, 0, 4, 12, 5, 13, 
+		    0, 0, 5, 6, 5, 2, 0, 0, 6, 7, 3, 0, 0, 0, 7, 8, 5, 3, 0, 0, 8, 12, 
+		    1, 0, 0, 0, 9, 10, 5, 8, 0, 0, 10, 12, 3, 0, 0, 5, 11, 2, 1, 0, 0, 
+		    0, 11, 4, 1, 0, 0, 0, 11, 5, 1, 0, 0, 0, 11, 9, 1, 0, 0, 0, 12, 50, 
+		    1, 0, 0, 0, 13, 14, 10, 6, 0, 0, 14, 15, 5, 11, 0, 0, 15, 49, 3, 0, 
+		    0, 7, 16, 18, 10, 4, 0, 0, 17, 19, 5, 8, 0, 0, 18, 17, 1, 0, 0, 0, 
+		    18, 19, 1, 0, 0, 0, 19, 20, 1, 0, 0, 0, 20, 21, 5, 7, 0, 0, 21, 49, 
+		    3, 0, 0, 5, 22, 23, 10, 1, 0, 0, 23, 24, 5, 12, 0, 0, 24, 49, 3, 0, 
+		    0, 2, 25, 26, 10, 3, 0, 0, 26, 28, 5, 5, 0, 0, 27, 29, 5, 8, 0, 0, 
+		    28, 27, 1, 0, 0, 0, 28, 29, 1, 0, 0, 0, 29, 30, 1, 0, 0, 0, 30, 49, 
+		    5, 10, 0, 0, 31, 33, 10, 2, 0, 0, 32, 34, 5, 8, 0, 0, 33, 32, 1, 0, 
+		    0, 0, 33, 34, 1, 0, 0, 0, 34, 35, 1, 0, 0, 0, 35, 36, 5, 4, 0, 0, 
+		    36, 45, 5, 2, 0, 0, 37, 42, 3, 0, 0, 0, 38, 39, 5, 1, 0, 0, 39, 41, 
+		    3, 0, 0, 0, 40, 38, 1, 0, 0, 0, 41, 44, 1, 0, 0, 0, 42, 40, 1, 0, 
+		    0, 0, 42, 43, 1, 0, 0, 0, 43, 46, 1, 0, 0, 0, 44, 42, 1, 0, 0, 0, 
+		    45, 37, 1, 0, 0, 0, 45, 46, 1, 0, 0, 0, 46, 47, 1, 0, 0, 0, 47, 49, 
+		    5, 3, 0, 0, 48, 13, 1, 0, 0, 0, 48, 16, 1, 0, 0, 0, 48, 22, 1, 0, 
+		    0, 0, 48, 25, 1, 0, 0, 0, 48, 31, 1, 0, 0, 0, 49, 52, 1, 0, 0, 0, 
+		    50, 48, 1, 0, 0, 0, 50, 51, 1, 0, 0, 0, 51, 1, 1, 0, 0, 0, 52, 50, 
+		    1, 0, 0, 0, 8, 11, 18, 28, 33, 42, 45, 48, 50];
 		protected static $atn;
 		protected static $decisionToDFA;
 		protected static $sharedContextCache;
@@ -98,7 +99,7 @@ namespace CannaPress\GcpTables\Filters {
 				return;
 			}
 
-			RuntimeMetaData::checkVersion('4.13.0', RuntimeMetaData::VERSION);
+			RuntimeMetaData::checkVersion('4.12.0', RuntimeMetaData::VERSION);
 
 			$atn = (new ATNDeserializer())->deserialize(self::SERIALIZED_ATN);
 
@@ -208,7 +209,7 @@ namespace CannaPress\GcpTables\Filters {
 					throw new NoViableAltException($this);
 				}
 				$this->ctx->stop = $this->input->LT(-1);
-				$this->setState(47);
+				$this->setState(50);
 				$this->errorHandler->sync($this);
 
 				$alt = $this->getInterpreter()->adaptivePredict($this->input, 7, $this->ctx);
@@ -220,7 +221,7 @@ namespace CannaPress\GcpTables\Filters {
 						}
 
 						$previousContext = $localContext;
-						$this->setState(45);
+						$this->setState(48);
 						$this->errorHandler->sync($this);
 
 						switch ($this->getInterpreter()->adaptivePredict($this->input, 6, $this->ctx)) {
@@ -229,13 +230,13 @@ namespace CannaPress\GcpTables\Filters {
 							    $this->pushNewRecursionContext($localContext, $startState, self::RULE_expr);
 							    $this->setState(13);
 
-							    if (!($this->precpred($this->ctx, 4))) {
-							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 4)");
+							    if (!($this->precpred($this->ctx, 6))) {
+							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 6)");
 							    }
 							    $this->setState(14);
 							    $this->match(self::OPERATOR);
 							    $this->setState(15);
-							    $this->recursiveExpr(5);
+							    $this->recursiveExpr(7);
 							break;
 
 							case 2:
@@ -243,8 +244,8 @@ namespace CannaPress\GcpTables\Filters {
 							    $this->pushNewRecursionContext($localContext, $startState, self::RULE_expr);
 							    $this->setState(16);
 
-							    if (!($this->precpred($this->ctx, 3))) {
-							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 3)");
+							    if (!($this->precpred($this->ctx, 4))) {
+							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 4)");
 							    }
 							    $this->setState(18);
 							    $this->errorHandler->sync($this);
@@ -257,80 +258,94 @@ namespace CannaPress\GcpTables\Filters {
 							    $this->setState(20);
 							    $this->match(self::K_LIKE);
 							    $this->setState(21);
-							    $this->recursiveExpr(4);
+							    $this->recursiveExpr(5);
 							break;
 
 							case 3:
-							    $localContext = new Context\IsNullExprContext(new Context\ExprContext($parentContext, $parentState));
+							    $localContext = new Context\LogicExpressionContext(new Context\ExprContext($parentContext, $parentState));
 							    $this->pushNewRecursionContext($localContext, $startState, self::RULE_expr);
 							    $this->setState(22);
-
-							    if (!($this->precpred($this->ctx, 2))) {
-							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 2)");
-							    }
-							    $this->setState(23);
-							    $this->match(self::K_IS);
-							    $this->setState(25);
-							    $this->errorHandler->sync($this);
-							    $_la = $this->input->LA(1);
-
-							    if ($_la === self::K_NOT) {
-							    	$this->setState(24);
-							    	$this->match(self::K_NOT);
-							    }
-							    $this->setState(27);
-							    $this->match(self::K_NULL);
-							break;
-
-							case 4:
-							    $localContext = new Context\InExprContext(new Context\ExprContext($parentContext, $parentState));
-							    $this->pushNewRecursionContext($localContext, $startState, self::RULE_expr);
-							    $this->setState(28);
 
 							    if (!($this->precpred($this->ctx, 1))) {
 							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 1)");
 							    }
-							    $this->setState(30);
+							    $this->setState(23);
+							    $this->match(self::LOGICAL_OPERATOR);
+							    $this->setState(24);
+							    $this->recursiveExpr(2);
+							break;
+
+							case 4:
+							    $localContext = new Context\IsNullExprContext(new Context\ExprContext($parentContext, $parentState));
+							    $this->pushNewRecursionContext($localContext, $startState, self::RULE_expr);
+							    $this->setState(25);
+
+							    if (!($this->precpred($this->ctx, 3))) {
+							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 3)");
+							    }
+							    $this->setState(26);
+							    $this->match(self::K_IS);
+							    $this->setState(28);
 							    $this->errorHandler->sync($this);
 							    $_la = $this->input->LA(1);
 
 							    if ($_la === self::K_NOT) {
-							    	$this->setState(29);
+							    	$this->setState(27);
 							    	$this->match(self::K_NOT);
 							    }
-							    $this->setState(32);
-							    $this->match(self::K_IN);
+							    $this->setState(30);
+							    $this->match(self::K_NULL);
+							break;
 
+							case 5:
+							    $localContext = new Context\InExprContext(new Context\ExprContext($parentContext, $parentState));
+							    $this->pushNewRecursionContext($localContext, $startState, self::RULE_expr);
+							    $this->setState(31);
+
+							    if (!($this->precpred($this->ctx, 2))) {
+							        throw new FailedPredicateException($this, "\\\$this->precpred(\\\$this->ctx, 2)");
+							    }
 							    $this->setState(33);
-							    $this->match(self::OPEN_PAR);
-							    $this->setState(42);
 							    $this->errorHandler->sync($this);
 							    $_la = $this->input->LA(1);
 
-							    if (((($_la) & ~0x3f) === 0 && ((1 << $_la) & 49668) !== 0)) {
-							    	$this->setState(34);
+							    if ($_la === self::K_NOT) {
+							    	$this->setState(32);
+							    	$this->match(self::K_NOT);
+							    }
+							    $this->setState(35);
+							    $this->match(self::K_IN);
+
+							    $this->setState(36);
+							    $this->match(self::OPEN_PAR);
+							    $this->setState(45);
+							    $this->errorHandler->sync($this);
+							    $_la = $this->input->LA(1);
+
+							    if (((($_la) & ~0x3f) === 0 && ((1 << $_la) & 24836) !== 0)) {
+							    	$this->setState(37);
 							    	$this->recursiveExpr(0);
-							    	$this->setState(39);
+							    	$this->setState(42);
 							    	$this->errorHandler->sync($this);
 
 							    	$_la = $this->input->LA(1);
 							    	while ($_la === self::T__0) {
-							    		$this->setState(35);
+							    		$this->setState(38);
 							    		$this->match(self::T__0);
-							    		$this->setState(36);
+							    		$this->setState(39);
 							    		$this->recursiveExpr(0);
-							    		$this->setState(41);
+							    		$this->setState(44);
 							    		$this->errorHandler->sync($this);
 							    		$_la = $this->input->LA(1);
 							    	}
 							    }
-							    $this->setState(44);
+							    $this->setState(47);
 							    $this->match(self::CLOSE_PAR);
 							break;
 						} 
 					}
 
-					$this->setState(49);
+					$this->setState(52);
 					$this->errorHandler->sync($this);
 
 					$alt = $this->getInterpreter()->adaptivePredict($this->input, 7, $this->ctx);
@@ -361,16 +376,19 @@ namespace CannaPress\GcpTables\Filters {
 		{
 			switch ($predicateIndex) {
 			    case 0:
-			        return $this->precpred($this->ctx, 4);
+			        return $this->precpred($this->ctx, 6);
 
 			    case 1:
-			        return $this->precpred($this->ctx, 3);
+			        return $this->precpred($this->ctx, 4);
 
 			    case 2:
-			        return $this->precpred($this->ctx, 2);
+			        return $this->precpred($this->ctx, 1);
 
 			    case 3:
-			        return $this->precpred($this->ctx, 1);
+			        return $this->precpred($this->ctx, 3);
+
+			    case 4:
+			        return $this->precpred($this->ctx, 2);
 			}
 
 			return true;
@@ -654,6 +672,42 @@ namespace CannaPress\GcpTables\Filters\Context {
 		{
 			if ($visitor instanceof TableFilterVisitor) {
 			    return $visitor->visitLikeExpr($this);
+		    }
+
+			return $visitor->visitChildren($this);
+		}
+	}
+
+	class LogicExpressionContext extends ExprContext
+	{
+		public function __construct(ExprContext $context)
+		{
+		    parent::__construct($context);
+
+		    $this->copyFrom($context);
+	    }
+
+	    /**
+	     * @return array<ExprContext>|ExprContext|null
+	     */
+	    public function expr(?int $index = null)
+	    {
+	    	if ($index === null) {
+	    		return $this->getTypedRuleContexts(ExprContext::class);
+	    	}
+
+	        return $this->getTypedRuleContext(ExprContext::class, $index);
+	    }
+
+	    public function LOGICAL_OPERATOR(): ?TerminalNode
+	    {
+	        return $this->getToken(TableFilterParser::LOGICAL_OPERATOR, 0);
+	    }
+
+		public function accept(ParseTreeVisitor $visitor): mixed
+		{
+			if ($visitor instanceof TableFilterVisitor) {
+			    return $visitor->visitLogicExpression($this);
 		    }
 
 			return $visitor->visitChildren($this);
