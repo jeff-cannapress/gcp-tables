@@ -27,7 +27,7 @@ paths:
           description: the id of the domain
           required: true
           schema:
-            $ref: '#/components/schemas/IdParameter'
+            $ref: '#/components/schemas/KeyParameter'
       responses:
         '204':
           description: Domain Exists
@@ -38,8 +38,7 @@ paths:
         '404':
           description: Domain not found
         '422':
-          description: Invalid/malformed domainId
-          
+          description: Invalid/malformed domainId          
     put:
       summary: create a domain
       operationId: domainCreate
@@ -49,7 +48,7 @@ paths:
           description: the id of the domain
           required: true
           schema:
-            $ref: '#/components/schemas/IdParameter'     
+            $ref: '#/components/schemas/KeyParameter'     
       responses:
         '204': 
           description: Domain already existed & no action was taken
@@ -74,7 +73,7 @@ paths:
           description: the id of the domain
           required: true
           schema:
-            $ref: '#/components/schemas/IdParameter'
+            $ref: '#/components/schemas/KeyParameter'
         - in: header
           name: If-Match
           schema:
@@ -98,7 +97,7 @@ paths:
           description: the id of the domain
           required: true
           schema:
-            $ref: '#/components/schemas/IdParameter'    
+            $ref: '#/components/schemas/KeyParameter'    
         - name: filter
           in: query
           description: the filter for the query
@@ -131,9 +130,7 @@ paths:
           content:
             application/x-www-form-urlencoded:
               schema:
-                $ref: '#/components/schemas/EntryQueryResult' 
-            
-          
+                $ref: '#/components/schemas/EntryQueryResult'                       
   /domains/{domainId}/{entryId}:
     get:
       summary: read an entry
@@ -144,13 +141,13 @@ paths:
           description: the id of the domain
           required: true
           schema:
-            $ref: '#/components/schemas/IdParameter'
+            $ref: '#/components/schemas/KeyParameter'
         - name: entryId
           in: path
           description: the id of the domain
           required: true
           schema:
-            $ref: '#/components/schemas/IdParameter'            
+            $ref: '#/components/schemas/KeyParameter'            
       responses:
         '200': 
           description: The url-encoded content of the entry
@@ -175,13 +172,13 @@ paths:
           description: the id of the domain
           required: true
           schema:
-            $ref: '#/components/schemas/IdParameter'
+            $ref: '#/components/schemas/KeyParameter'
         - name: entryId
           in: path
           description: the id of the domain
           required: true
           schema:
-            $ref: '#/components/schemas/IdParameter'
+            $ref: '#/components/schemas/KeyParameter'
         - in: header
           name: If-Match
           schema:
@@ -218,13 +215,13 @@ paths:
           description: the id of the domain
           required: true
           schema:
-            $ref: '#/components/schemas/IdParameter'
+            $ref: '#/components/schemas/KeyParameter'
         - name: entryId
           in: path
           description: the id of the domain
           required: true
           schema:
-            $ref: '#/components/schemas/IdParameter'
+            $ref: '#/components/schemas/KeyParameter'
         - in: header
           name: If-Match
           schema:
@@ -243,7 +240,7 @@ paths:
 
 components:
   schemas:
-    IdParameter:
+    KeyParameter:
       type: string
       minLength: 3
       maxLength: 128

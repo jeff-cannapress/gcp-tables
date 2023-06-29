@@ -28,7 +28,7 @@ OPERATOR: '<' | '<=' | '>' | '>=' | '==' | '<>' ;
 LOGICAL_OPERATOR: 'and' | 'or';
 
 IDENTIFIER
- : [a-zA-Z_] [a-zA-Z_0-9-.]* 
+ : [a-zA-Z_] [a-zA-Z_0-9-.[\]]* 
  ;
 
 

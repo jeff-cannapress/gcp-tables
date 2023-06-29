@@ -9,6 +9,7 @@ use CannaPress\GcpTables\Filters\TableFilter;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use \GuzzleHttp\Psr7\Response;
+use CannaPress\GcpTables\Endpoints\ApiException;
 
 class Endpoint
 {
@@ -37,7 +38,7 @@ class Endpoint
         $path[1] = isset($path[1]) ? $path[1] : null;
         list($domain, $id) = $path;
         if(empty($domain)){
-            throw new EndpointException(404, 'Invalid Endpoint -- no domain found', ['uri'=> $request->getUri()->__toString()]);
+            throw new ApiException(404, 'Invalid Endpoint -- no domain found', ['uri'=> $request->getUri()->__toString()]);
         }
         $query = $request->getUri()->getQuery();
         $is_entry = !is_null($id) || !empty($query);
